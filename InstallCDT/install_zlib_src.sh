@@ -1,38 +1,49 @@
 #!/bin/sh
-installResources=`pwd`/Resources
-scriptResources=$installResources/scripts
 
-productFolder=/Developer/Cocotron/1.0
-downloadFolder=$productFolder/Downloads
+# ########## # ########### ########### ########### ##########
+# ##
+# ##    Cocotron installer compmunity updates
+# ##    Based from Christopher J. W. Lloyd
+# ##        :: Cocotron project ::
+# ##
+# ##    Created by Genose.org (Sebastien Ray. Cotillard)
+# ##    Date 10-oct-2016
+# ##    last update 25-oct-2016
+# ##
+# ##    Please support genose.org, the author and his projects
+# ##    
+# ##    Based on genose.org tools
+# ##
+# ##    //////////////////////////////////////////////////////////////
+# ##    // http://project2306.genose.org  // git :: project2306_ide //
+# ##    /////////////////////////////////////////////////////////////
+# ##
+# ##    -- Cocotron compmunity updates
+# ##
+# ########## # ########### ########### ########### ##########
+# ########## # ########### ########### ########### ##########
 
-if [ ""$1"" = "" ];then
-  targetPlatform="Windows"
-else
-  targetPlatform=$1
-fi
-
-if [ ""$2"" = "" ];then
-  targetArchitecture="i386"
-else
-  targetArchitecture=$2
-fi
-
-if [ ""$3"" = "" ];then
-  gccVersion="4.3.1"
-else
-  gccVersion=$3
-fi
+source $( find $(dirname $0) -name common_functions.sh -type f -print )
 
 BASEDIR=/Developer/Cocotron/1.0/$targetPlatform/$targetArchitecture
-PREFIX=`pwd`/../system/i386-mingw32msvc
-BUILD=/tmp/build_zlib
+ 
+packedVersionMajor="1.9.2"
+packedVersionMinor=""
+packedVersionRev=""
+packedVersionPlatform=".win32"
+packedVersionArch=""
+packedVersionCheck="${packedVersionMajor}:${packedVersionMinor}:${packedVersionRev}:${packedVersionPlatform}:${packedVersionArch}"
+packedVersion="${packedVersionMajor}${packedVersionMinor}${packedVersionRev}${packedVersionPlatform}${packedVersionArch}"
+packedProduct="zlib"
 
-$scriptResources/downloadFilesIfNeeded.sh $downloadFolder http://freefr.dl.sourceforge.net/project/libpng/zlib/1.2.5/zlib-1.2.5.tar.bz2
+ 
+
+$scriptResources/downloadFilesIfNeeded.sh $downloadFolder -c "${packedVersionCheck}" "http://freefr.dl.sourceforge.net/project/libpng/${packedProduct}/${packedVersion}/${packedProduct}-${packVersion}.tar.bz2"
 
 mkdir -p $BUILD
 cd $BUILD
-tar -xvjf $downloadFolder/zlib-1.2.5.tar.bz2
-cd zlib-1.2.5
+tar -xvjf $downloadFolder/${packedProduct}-${packVersion}.tar.bz2
+cd ${packedProduct}-${packVersion} || send_exit $0 $LINENO
 
 pwd 
 
@@ -41,13 +52,12 @@ RANLIB=$(echo $BASEDIR/gcc-$gccVersion/bin/*ranlib)
 AR=$(echo $BASEDIR/gcc-$gccVersion/bin/*ar)
 
 
-COCOTRON=/Developer/Cocotron/1.0//build/$targetPlatform/$targetArchitecture
-INSTALL_PREFIX=$(PREFIX)/zlib-1.2.5/
+INSTALL_PREFIX=${productCrossPorting_Target_default_compiler_basedir}/${packedProduct}-${packVersion}/
 BINARY_PATH=$INSTALL_PREFIX/bin
 INCLUDE_PATH=$INSTALL_PREFIX/include
 LIBRARY_PATH=$INSTALL_PREFIX/lib
 
-
+make clean
 make -p $BINARY_PATH
 make -p $LIBRARY_PATH
 make -p $INCLUDE_PATH
