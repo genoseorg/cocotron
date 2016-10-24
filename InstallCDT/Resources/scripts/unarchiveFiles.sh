@@ -2,7 +2,7 @@
 
 # ########## # ########### ########### ########### ##########
 # ##
-# ##    Cocotron installer compmunity updates
+# ##    Cocotron installer community updates
 # ##    Based from Christopher J. W. Lloyd
 # ##        :: Cocotron project ::
 # ##
@@ -18,7 +18,7 @@
 # ##    // http://project2306.genose.org  // git :: project2306_ide //
 # ##    /////////////////////////////////////////////////////////////
 # ##
-# ##    -- Cocotron compmunity updates
+# ##    -- Cocotron community updates
 # ##
 # ########## # ########### ########### ########### ##########
 # ########## # ########### ########### ########### ##########
@@ -46,9 +46,9 @@ source $( find $(dirname $0) -name common_functions.sh -type f -print )
 
 
 set -eu
-sourceFolder=$1
-destinationFolder=$2
-listOfFiles="$3"
+sourceFolder=${1-$DEFAULT}
+destinationFolder=${2-$DEFAULT}
+listOfFiles="${3-$DEFAULT}"
  
 echo "Unarchive Get : (${sourceFolder}): (${destinationFolder}) :: (${listOfFiles})"
  
@@ -84,7 +84,7 @@ do
         exit 1
     fi
      
-    /bin/echo "Unarchiving $locationOfFile$extension ..." | tee >&2 >> $SCRIPT_TTY
+    tty_echo "Unarchiving $locationOfFile$extension ..." | tee >&2 >> $SCRIPT_TTY
  
     # ## (cd $destinationFolder; $unArchiverTool   $unarchiveFlags $locationOfFile$extension)
     
