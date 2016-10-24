@@ -1,7 +1,10 @@
 #!/bin/sh
 
 # ########## # ########### ########### ########### ##########
-# ########## # ########### ########### ########### ##########
+# ##
+# ##    Cocotron installer community updates
+# ##    Based from Christopher J. W. Lloyd
+# ##        :: Cocotron project ::
 # ##
 # ##    Created by Genose.org (Sebastien Ray. Cotillard)
 # ##    Date 10-oct-2016
@@ -15,286 +18,63 @@
 # ##    // http://project2306.genose.org  // git :: project2306_ide //
 # ##    /////////////////////////////////////////////////////////////
 # ##
-# ##    -- Cocotron compmunity updates
+# ##    -- Cocotron community updates
+# ##
+# ########## # ########### ########### ########### ##########
+ 
+
+# ########## # ########### ########### ########### ##########
+# ##
+# ##    Modified 10-oct-2016 by Genose.org (Sebastien Ray. Cotillard)
+# ##
+# ##    Change Log :
+# ##
+# ##		- Loves "# ## " sequence
+# ##		- Hates so much, but when it cant be, Loves "long shell sentences " when don t know alternative
+# ##        - Script Cosmetics
+# ##        - More Screen & Script Cosmetics ...
+# ##        - Lots and Lots More Screen & Script Cosmetics ...
+# ##        - Lots and Lots More GUI Friendly ...
+# ##
+# ##        - Separated logs in 3 parts (User Screen progress, Error log, Install log)
+# ##
+# ##        - Zip / Tar / GZ, platform dependant uniformisation / standardisation
+# ##
+# ##    - Curl and Download Improvements (see ressources/scripts/downloadIfNeeded.sh)
+# ## 	- Curl based Version checker for download updates ( Http and Ftp thru http )
+# ##
+# ##     - Remove Deprecated :
+# ##       ---- > > Google Url updates to Git
+# ##       ---- > > Url updates to Git / SourceForge
+# ##
+# ##    - GUI Friendly (MACOS X / Linux)
+# ##      ---- > > use of gnome-terminal / xterm / konsole / Terminal.app to follow script progress thru 2 more window with args : Error log, Install log
+# ##
+# ##    - ADDED More Pipes to Log files and Install.sh Screen's Pipe == > > ${SCRIPT_TTY}
+# ##    - ADDED More Graphical Pipe and Trap Ctrl-c / Exit  and send status to ${SCRIPT_TTY}
+# ##
+# ##    MacOS Contributions
+# ##        - Fix for Sed RE error: illegal byte sequence on Mac OS X
+# ##        -- > > Sed error when compile so fix it with printenv specific 2 commands ( export LC_CTYPE=C ; export LANG=C )
+# ##
+# ##        - Fix Zip / Tar / GZ, sometime don't extract
+# ##        ---- > >  so use MacOSX's "Archive Utility.app" instead
 # ##
 # ########## # ########### ########### ########### ##########
 # ########## # ########### ########### ########### ##########
 
-
-
-# #### # #### # ####
-# ## set a default value awise a NULL / not declared param
-
-# #### # #### # ####
-# ## set a default value awise a NULL / not declared param
-DEFAULT_FUNC_PARAM=""
-DEFAULT="${DEFAULT_FUNC_PARAM}"
-# #### # #### # ####
-
-
-SCRIPT_TTY=$( (ps ax | grep -i "install.sh" || ps ax | grep -vi "install.sh" | grep -vi "$0" | grep -i "install" | grep -i ".sh"  | grep -vi "log" || ps ax | grep $$) | awk '{ print "/dev/tty" $2 }' | uniq )
-
-# #### # #### # ####
-export HISTTIMEFORMAT="%d/%m/%y %T "
-set -o history
-
-# ########### ########### ########### ########### ########### ########### ##########
-# ## http://stackoverflow.com/questions/3572030/bash-script-absolute-path-with-osx
-# ########### ########### ########### ########### ########### ########### ##########
-declare realpathx_return="./"
-realpathx() {
-
-OURPWD=$PWD
-cd "$(dirname "$1")"
-LINK=$(readlink "$(basename "$1")")
-while [ "$LINK" ]; do
-cd "$(dirname "$LINK")"
-LINK=$(readlink "$(basename "$1")")
-done
-REALPATH="$PWD/$(basename "$1")"
-cd "$OURPWD"
-# ## echo ":::: realpathx == ${REALPATH} "
-    realpathx_return=${REALPATH}
-
-}
-
-realpathx $0
-## 
-installResources=$( dirname "${realpathx_return}/"  | grep -i "Resources"  && true ||  dirname $( find $( dirname $( dirname "${realpathx_return}/" ) ) -name common_functions.sh -type f -exec  dirname {} \;    )   )
-##
-scriptResources=$installResources/scripts/
-# ########## # ########### ########### ########### ##########
-# ########## # ########### ########### ########### ##########
-
-
-
-
-enableLanguages="c,objc,c++,obj-c++"
-
-# ########## # ########### ########### ########### ##########
-# ########## # ########### ########### ########### ##########
-
-installFolder=/Developer
-productName=Cocotron
-productVersion=1.0
-
-# ########## # ########### ########### ########### ##########
-# ########## # ########### ########### ########### ##########
-
-# ## binutilsVersion=2.21-20111025
-binutilsVersion=2.21.1
-mingwRuntimeVersion=3.20
-mingwAPIVersion=3.17-2
-gmpVersion=4.2.3
-mpfrVersion=2.3.2
-
-# ########## # ########### ########### ########### ##########
-# ########## # ########### ########### ########### ##########
-
-binutilsConfigureFlags=""
-
-# ########## # ########### ########### ########### ##########
-# ########## # ########### ########### ########### ##########
-
-# #################
-# URLs
-# #################
-
-# ########### ##########
-# ## 2016 deprecated
-# ## url_Download_GPL3_v1="https://code.google.com/archive/p/cocotron-tools-gpl3/downloads/"
-# ########### ##########
-
-# ########### ##########
-# ## 2016/10 new
-# ## but still deprecated ...
-url_Download_GPL3="https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/cocotron-tools-gpl3"
-# ########### ##########
-
-productCrossPorting_Name="Cocotrom"
-productCrossPorting_Version="1.0"
-productCrossPorting_Folder="/Developer/${productCrossPorting_Name}/${productCrossPorting_Version}"
-productCrossPorting_downloadFolder="${productCrossPorting_Folder}/Downloads"
-productCrossPorting_Target_default="Windows"
-productCrossPorting_Target_default_arch="i386"
-productCrossPorting_Target_default_arch_wordSize="32"
-productCrossPorting_Target_default_compiler="gcc"
-
-productCrossPorting_Target_default_compiler_dir_build_platform="${productCrossPorting_Folder}/build/$productCrossPorting_Target_default/$productCrossPorting_Target_default_arch"
-
-# ## productCrossPorting_Target_default_compiler_dir_system="${productCrossPorting_Folder}/system/i386-mingw32msvc/"
-productCrossPorting_Target_default_compiler_dir_system=$( dirname `pwd` )"/system/i386-mingw32msvc/"
-
-productCrossPorting_Target_default_compiler_version="4.3.1"
-productCrossPorting_Target_default_compiler_version_Date=""
-
-productCrossPorting_Target_default_compiler_dir_system=`pwd`/../system/i386-mingw32msvc/
-
-productCrossPorting_Target_default_compiler_basedir="${productCrossPorting_Folder}/${productCrossPorting_Target_default}/${productCrossPorting_Target_default_arch}/${productCrossPorting_Target_default_compiler}-${productCrossPorting_Target_default_compiler_version}/"
-
-
-
-productCrossPorting_Target_avail=("Windows" "Linux" "BSD" "Solaris" "Darwin")
-
-
-
-# ## productCrossPorting_Target_default=""
-# ## productCrossPorting_Target_default_arch=""
-# ## productCrossPorting_Target_default_compiler_version=""
-# ########## # ########### ########### ########### ##########
-# ########## # ########### ########### ########### ##########
-
-if [ ""${1-DEFAULT}"" = "" ];then
-  productCrossPorting_Target_default="${productCrossPorting_Target_default}"
-else
-  productCrossPorting_Target_default=${1-DEFAULT}
-fi
-# ########## # ########### ########### ########### ##########
-# ########## # ########### ########### ########### ##########
-
-if [ ""${2-DEFAULT}"" = "" ];then
-  productCrossPorting_Target_default_arch="${productCrossPorting_Target_default_arch}"
-else
-  productCrossPorting_Target_default_arch=${2-DEFAULT}
-fi
-# ########## # ########### ########### ########### ##########
-# ########## # ########### ########### ########### ##########
-
-if [ ""${3-DEFAULT}"" = "" ];then
-	productCrossPorting_Target_default_compiler="${productCrossPorting_Target_default_compiler}"
-else
-	productCrossPorting_Target_default_compiler=${3-DEFAULT}
-fi
-# ########## # ########### ########### ########### ##########
-# ########## # ########### ########### ########### ##########
- 
-# ## productCrossPorting_Target_default_compiler_version="4.3.1"
-
-if [ ""${4-DEFAULT}"" = "" ];then
-  productCrossPorting_Target_default_compiler_version="${productCrossPorting_Target_default_compiler_version}"
-else
-  productCrossPorting_Target_default_compiler_version=${4-DEFAULT}
-fi
-# ########## # ########### ########### ########### ##########
-# ########## # ########### ########### ########### ##########
-
-# ########## # ########### ########### ########### ##########
-# ########## # ########### ########### ########### ##########
-
-if [ ""${5-DEFAULT}"" = "" ];then
-	if [ "$productCrossPorting_Target_default_compiler" = "gcc" ]; then
-		productCrossPorting_Target_default_compiler_version=$productCrossPorting_Target_default_compiler_version
-	elif [ "$productCrossPorting_Target_default_compiler" = "llvm-clang" ]; then
-		productCrossPorting_Target_default_compiler_version="trunk"
-	else
-		/bin/echo "Unknown productCrossPorting_Target_default_compiler "$productCrossPorting_Target_default_compiler
-		exit 1
-	fi
-else
-	productCrossPorting_Target_default_compiler_version=${5-DEFAULT}
-fi
-
-# ########## # ########### ########### ########### ##########
-# ########## # ########### ########### ########### ##########
-
-if [ ""${6-DEFAULT}"" = "" ];then
-	if [ "$productCrossPorting_Target_default_compiler" = "gcc" ]; then
-        productCrossPorting_Target_default_compiler_version_Date="-02242010"
-	elif [ "$productCrossPorting_Target_default_compiler" = "llvm-clang" ]; then
-        productCrossPorting_Target_default_compiler_version_Date="-05042011"
-	else
-		/bin/echo "Unknown productCrossPorting_Target_default_compiler "$productCrossPorting_Target_default_compiler
-		exit 1
-	fi
-else
-	productCrossPorting_Target_default_compiler_version_Date="-"${6-DEFAULT}
-fi
-
-# ########## # ########### ########### ########### ##########
-# ########## # ########### ########### ########### ##########
-
-osVersion=${7-DEFAULT}
-
-if [ ""$osVersion"" = "" ];then
-	if [ ""$osVersion"" = "" -a ""$productCrossPorting_Target_default"" = "Solaris" ];then
-		osVersion="2.10"
-	elif [ ""$osVersion"" = "" -a ""$productCrossPorting_Target_default"" = "FreeBSD" ];then
-		osVersion="7"
-	else
-		osVersion=""
-	fi
-else
-	osVersion=$osVersion
-fi
-
-# ########## # ########### ########### ########### ##########
-# ########## # ########### ########### ########### ##########
-
-if [ $productCrossPorting_Target_default_arch = "x86_64" ];then
-	productCrossPorting_Target_default_arch_wordSize="64"
-else
-	productCrossPorting_Target_default_arch_wordSize="32"
-fi
-
-packedVersionMajor=""
-packedVersionMinor=""
-packedVersionRev=""
-packedVersionPlatform=".win32"
-packedVersionArch="-X86"
-packedVersionCheck="${packedVersionMajor}:${packedVersionMinor}:${packedVersionRev}:${packedVersionPlatform}:${packedVersionArch}"
-packedVersion="${packedVersionMajor}${packedVersionMinor}${packedVersionRev}${packedVersionPlatform}${packedVersionArch}"
-packedProduct=""
-
-BUILD=$( echo "/tmp/"$( basename $0 | tr "." " " | awk '{print $1}' ) )
-TMPDIR=$( echo "/tmp/"$( basename $0 | tr "." " " | awk '{print $1}' ) )
-
-mkdir -p $BUILD
-rm -Rv $BUILD/* 2>/dev/null
- 
-
-mkdir -p $TMPDIR
-rm -Rv $TMPDIR/* 2>/dev/null
-cd $TMPDIR
-
-mkdir -p $productCrossPorting_Target_default_compiler_dir_system
-mkdir -p $productCrossPorting_Target_default_compiler_dir_system/include
-mkdir -p $productCrossPorting_Target_default_compiler_dir_system/bin
-mkdir -p $productCrossPorting_Target_default_compiler_dir_system/lib
-
-# ########## # ########### ########### ########### ##########
-# ########## # ########### ########### ########### ##########
-
-SYSTEM_HOST=`uname -s`
-SYSTEM_HOST_VERSION=$( ((sw_vers -productVersion  2>/dev/null  ) ||   uname -r )   | tr "." " " | awk '{ print  $1"."$2 }'  )
-SYSTEM_HOST_VERSION_NAME=$( uname -s )
-# ## system type
-# ## 1 : MacOS
-# ## 2 : Unix / GNU / Linux
-# ## 3 : Windows
-SYSTEM_HOST_TYPE=1
-# ########
-# ########
-# ## Cocotrons Default Goal : Apple Cocoa -- > > Windows
-SYSTEM_TARGET_TYPE=3
-# ########
-# ########
-
-
-
-# ########## # ########### ########### ########### ##########
-# ########## # ########### ########### ########### ##########
 tty_echo() {
 	/bin/echo $@ >>  $SCRIPT_TTY
 }
 function tty_dialog() {
-/bin/echo " "
-/bin/echo "########### # ########### ########### ########### ###########" >>  $SCRIPT_TTY
-/bin/echo "########### # ########### ########### ########### ###########" >>  $SCRIPT_TTY
-/bin/echo "# ##    $1 ::                                  " >>  $SCRIPT_TTY
-/bin/echo "# ##        -- $2                                     " >>  $SCRIPT_TTY
-/bin/echo "########### # ########### ########### ########### ###########" >>  $SCRIPT_TTY
-/bin/echo "########### # ########### ########### ########### ###########" >>  $SCRIPT_TTY
-/bin/echo " "
+tty_echo " "
+tty_echo "########### # ########### ########### ########### ###########"  
+tty_echo "########### # ########### ########### ########### ###########"  
+tty_echo "# ##    $1 ::                                  "  
+tty_echo "# ##        -- $2                                     "  
+tty_echo "########### # ########### ########### ########### ###########"  
+tty_echo "########### # ########### ########### ########### ###########"  
+tty_echo " "
 
 }
 
@@ -323,7 +103,7 @@ tyy_in=$(echo $SCRIPT_TTY | sed -e 's;/dev/tty;;g' )
     tyy_out_ps=$( echo "${tyy_out_ps_match[*]}" | awk '{ print $1 }' | uniq )
     echo " "| tee >&2 >> $SCRIPT_TTY
     echo "#### @@@@  #### @@@@  "   | tee >&2 >> $SCRIPT_TTY
-    echo "#### @@@@ Receive Quit .... from ($tyy_in:"$( basename "$0"   )") in (up:${SCRIPT_TTY_UP} from super:$SCRIPT_TTY_SUPER)  to ($tyy_out):("$( echo "${tyy_out_ps[*]}" | tr "\\n" '; ' ) ") " | tee >&2 >> $SCRIPT_TTY
+    echo "#### @@@@ Receive Quit .... from ($tyy_in:"$( basename "$0"   )") in (up:${SCRIPT_TTY_UP-${DEFAULT}} from super:${SCRIPT_TTY_SUPER-${DEFAULT}})  to ($tyy_out):("$( echo "${tyy_out_ps[*]}" | tr "\\n" '; ' ) ") " | tee >&2 >> $SCRIPT_TTY
     echo "#### @@@@  #### @@@@  "   | tee >&2 >> $SCRIPT_TTY
     echo " "| tee >&2 >> $SCRIPT_TTY
     echo "@@@@@@@@   @@@@@@@@   @@@@@@@@ " | tee >&2 >> $SCRIPT_TTY
@@ -372,18 +152,18 @@ let "tty_awaitingpath_since_long= ((tty_awaitingpath_since %60) == 0)?0:1"
 
 
 if [ $tty_awaitingpath_since_too_long -lt $tty_awaitingpath_since ]; then
-/bin/echo " "
+tty_echo " "
 exit_witherror " Still Waiting ... Too Long, Come back when it's done "
 fi
 
 if [ $tty_awaitingpath_since_long -eq 0 ]; then
 
-/bin/echo " Still Waiting "
+tty_echo " Still Waiting "
 fi
 done
 
-/bin/echo "******* ******* ******* ******* ******* ******* ******* ******* "
-/bin/echo "******* ******* ******* ******* ******* ******* ******* ******* "
+tty_echo "******* ******* ******* ******* ******* ******* ******* ******* "
+tty_echo "******* ******* ******* ******* ******* ******* ******* ******* "
 
 }
 
@@ -408,7 +188,7 @@ tty_yesyno_response=$( echo "$tty_yesyno_response" | tr "[:upper:]" "[:lower:]" 
 
 if [ "$tty_yesyno_response" == "" ]; then
 tty_yesyno_response="y"
-/bin/echo " --- Using default answer ::(${tty_yesyno_response}) --- "
+tty_echo " --- Using default answer ::(${tty_yesyno_response}) --- "
 fi
 # ###########
 if [ "$tty_yesyno_response" == "y" ] || [ "$tty_yesyno_response" == "yes" ]; then
@@ -424,14 +204,14 @@ break
 fi
 
 # ###########
-/bin/echo "******* ******* ******* ******* ******* ******* ******* ******* "
-/bin/echo "**** Please answer by (Y or n) Default is (Y) ..."
-/bin/echo "******* ******* ******* ******* ******* ******* ******* ******* "
+tty_echo "******* ******* ******* ******* ******* ******* ******* ******* "
+tty_echo "**** Please answer by (Y or n) Default is (Y) ..."
+tty_echo "******* ******* ******* ******* ******* ******* ******* ******* "
 
 done
 
-/bin/echo "******* ******* ******* ******* ******* ******* ******* ******* "
-/bin/echo "******* ******* ******* ******* ******* ******* ******* ******* "
+tty_echo "******* ******* ******* ******* ******* ******* ******* ******* "
+tty_echo "******* ******* ******* ******* ******* ******* ******* ******* "
 
 }
 
@@ -466,13 +246,16 @@ fi
 fi
 lastcmd
 tty_dialog "Trapped Exit" " ${message_quit} (${exit_code})"
-/bin/echo " ***** QUIT *****"
+tty_echo " ***** QUIT *****"
 }
 
 
 # ########## # ########### ########### ########### ##########
 function send_exit ()
 {
+ #   echo " #### called :: "
+ local SCRIPT_TTY_STACK_script=$( echo ${1-${DEFAULT}} || echo $0 )
+ local SCRIPT_TTY_STACK_script_line=$( echo ${2-${DEFAULT}} || echo "--##--")
 tyy_in=$(echo $SCRIPT_TTY | sed -e 's;/dev/tty;;g' )
 tyy_out_ps_match=$( ps ax | grep -i "$tyy_in"  | grep -i "install" | grep -i ".sh" | grep -vi 'grep' | grep -vi 'exec')
 
@@ -480,7 +263,7 @@ tyy_out=$( echo "${tyy_out_ps_match[*]}" | awk '{ print $2 }' | uniq )
 tyy_out_ps=$( echo "${tyy_out_ps_match[*]}" | awk '{ print $1 }' | uniq )
 echo " "| tee >&2 >> $SCRIPT_TTY
 echo "#### @@@@  #### @@@@  "   | tee >&2 >> $SCRIPT_TTY
-echo "#### @@@@ Send Quit .... from ($tyy_in:"$( basename "$0"   )") in (up:${SCRIPT_TTY_UP} from super:$SCRIPT_TTY_SUPER)  to ($tyy_out):("$( echo "${tyy_out_ps[*]}" | tr "\\n" '; ' ) ") " | tee >&2 >> $SCRIPT_TTY
+echo "#### @@@@ Send Quit .... from ($tyy_in:"$( basename "$0"   )") in (up:${SCRIPT_TTY_UP-${DEFAULT}} from super:$SCRIPT_TTY_SUPER-${DEFAULT})  to ($tyy_out):("$( echo "${tyy_out_ps[*]}" | tr "\\n" '; ' ) ") " | tee >&2 >> $SCRIPT_TTY
 echo "#### @@@@  #### @@@@  "   | tee >&2 >> $SCRIPT_TTY
 echo " "| tee >&2 >> $SCRIPT_TTY
 echo "@@@@@@@@   @@@@@@@@   @@@@@@@@ " | tee >&2 >> $SCRIPT_TTY
@@ -503,13 +286,19 @@ let "num_x=num*2"
 v=$(printf "%-${num_x}s" "-")
 l=$(printf "%-${num_x}s" " ")
 
-echo " #${num} ${l// / }L${v// /-} > > $0" | tee >&2 >> $SCRIPT_TTY
+echo " #${num} ${l// / }L${v// /-} > > ${SCRIPT_TTY_STACK_script} :: ${SCRIPT_TTY_STACK_script_line}" | tee >&2 >> $SCRIPT_TTY
 echo " "| tee >&2 >> $SCRIPT_TTY
 echo "@@@@@@@@   @@@@@@@@   @@@@@@@@ " | tee >&2 >> $SCRIPT_TTY
 echo "#### @@@@  #### @@@@  "   | tee >&2 >> $SCRIPT_TTY
 kill -INT  $tyy_out_ps 2>/dev/null
 kill -QUIT $tyy_out_ps 2>/dev/null
 
-send_exit
+ 
 }
 
+
+source $( find $(dirname $0) -name common_declare.sh -type f -print )
+
+
+# ########## # ########### ########### ########### ##########
+# ########## # ########### ########### ########### ##########
