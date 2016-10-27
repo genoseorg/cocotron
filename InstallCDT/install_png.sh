@@ -39,10 +39,10 @@ cd libpng-${VERSION}
 
 pwd 
 
-GCC=$(echo $BASEDIR/gcc-$gccVersion/bin/*gcc)
-AS=$(echo $BASEDIR/gcc-$gccVersion/bin/*as)
-AR=$(echo $BASEDIR/gcc-$gccVersion/bin/*ar)
-RANLIB=$(echo $BASEDIR/gcc-$gccVersion/bin/*ranlib)
+GCC=$(echo $BASEDIR/gcc-$gccVersion/bin/*gcc |  tr -s " " ":" | cut -d':' -f 2 | awk "{print $1;  fflush();}" )
+AS=$(echo $BASEDIR/gcc-$gccVersion/bin/*as |  tr -s " " ":" | cut -d':' -f 2 | awk "{print $1;  fflush();}" )
+AR=$(echo $BASEDIR/gcc-$gccVersion/bin/*ar |  tr -s " " ":" | cut -d':' -f 2 | awk "{print $1;  fflush();}" )
+RANLIB=$(echo $BASEDIR/gcc-$gccVersion/bin/*ranlib |  tr -s " " ":" | cut -d':' -f 2 | awk "{print $1;  fflush();}" )
 TARGET=$($GCC -dumpmachine)
 
 
@@ -57,13 +57,13 @@ export LDFLAGS="-L$PREFIX/zlib-1.2.5/lib"
 export CFLAGS="-I$PREFIX/zlib-1.2.5/include"
 
 GCC="$GCC $CFLAGS"
-
+make clean
 make -p $BINARY_PATH
 make -p $LIBRARY_PATH
 make -p $INCLUDE_PATH
 
-echo ./configure --prefix="$INSTALL_PREFIX" -host $TARGET AR=$AR CC=$GCC RANLIB=$RANLIB AS=$AS 
-./configure --prefix="$INSTALL_PREFIX" -host $TARGET -with-zlib-prefix=$BASEDIR/zlib-1.2.5 AR="$AR" CC="$GCC" RANLIB="$RANLIB" AS="$AS"
+echo ./configure --prefix="$INSTALL_PREFIX"   --disable-shared --host=$TARGET --target=$TARGET  AR=$AR CC=$GCC RANLIB=$RANLIB AS=$AS
+./configure --prefix="$INSTALL_PREFIX"  --disable-shared --host=$TARGET --target=$TARGET   -with-zlib-prefix=$BASEDIR/zlib-1.2.5 AR="$AR" CC="$GCC" RANLIB="$RANLIB" AS="$AS"
 
 make && make install
 

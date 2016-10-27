@@ -1,28 +1,54 @@
 #!/bin/sh
-installResources=`pwd`/Resources
-scriptResources=$installResources/scripts
 
-productFolder=/Developer/Cocotron/1.0
-downloadFolder=$productFolder/Downloads
+# ########## # ########### ########### ########### ##########
+# ##
+# ##    Cocotron installer compmunity updates
+# ##    Based from Christopher J. W. Lloyd
+# ##        :: Cocotron project ::
+# ##
+# ##    Created by Genose.org (Sebastien Ray. Cotillard)
+# ##    Date 10-oct-2016
+# ##    last update 25-oct-2016
+# ##
+# ##    Please support genose.org, the author and his projects
+# ##    
+# ##    Based on genose.org tools
+# ##
+# ##    //////////////////////////////////////////////////////////////
+# ##    // http://project2306.genose.org  // git :: project2306_ide //
+# ##    /////////////////////////////////////////////////////////////
+# ##
+# ##    -- Cocotron compmunity updates
+# ##
+# ########## # ########### ########### ########### ##########
+# ########## # ########### ########### ########### ##########
 
-PREFIX=`pwd`/../system/i386-mingw32msvc
-INCLUDE=$PREFIX/include
-BIN=$PREFIX/bin
-LIB=$PREFIX/lib
+source $( find $(dirname $0) -name common_functions.sh -type f -print )
 
-$scriptResources/downloadFilesIfNeeded.sh $downloadFolder "http://sourceforge.net/projects/plibc/files/plibc/0.1.5/plibc-0.1.5.zip"
 
-TMPDIR=/tmp/install_plibc$$
-mkdir $TMPDIR
-cd $TMPDIR
-unzip $downloadFolder/plibc-0.1.5.zip
+INCLUDE=$productCrossPorting_Target_default_compiler_dir_system/include
+BIN=$productCrossPorting_Target_default_compiler_dir_system/bin
+LIB=$productCrossPorting_Target_default_compiler_dir_system/lib
 
-mkdir -p $PREFIX/bin
-cp bin/libplibc-1.dll  $PREFIX/bin
+packedVersionMajor="0.1.5"
+packedVersionMinor=""
+packedVersionRev=""
+packedVersionPlatform=""
+packedVersionArch=""
+packedVersionCheck="${packedVersionMajor}:${packedVersionMinor}:${packedVersionRev}:${packedVersionPlatform}:${packedVersionArch}"
+packedVersion="${packedVersionMajor}${packedVersionMinor}${packedVersionRev}${packedVersionPlatform}${packedVersionArch}"
+packedProduct="plibc"
+ 
+$scriptResources/downloadFilesIfNeeded.sh $productCrossPorting_downloadFolder  -c "${packedVersionCheck}" "http://sourceforge.net/projects/${packedProduct}/files/plibc/${plibVersion}/${packedProduct}-${packedVersion}.zip"
 
-mkdir -p $PREFIX/lib
-cp lib/libplibc.dll.a $PREFIX/lib/libplibc.a
+$scriptResources/unarchiveFiles.sh  $productCrossPorting_downloadFolder $TMPDIR "${packedProduct}-${packedVersion}"  
 
-mkdir -p $PREFIX/include
-(cd include;tar -cf - *) | (cd $PREFIX/include;tar -xf -)
+mkdir -p $productCrossPorting_Target_default_compiler_dir_system/bin
+cp bin/libplibc-1.dll  $productCrossPorting_Target_default_compiler_dir_system/bin || send_exit $0 $LINENO
+
+mkdir -p $productCrossPorting_Target_default_compiler_dir_system/lib
+cp lib/libplibc.dll.a $productCrossPorting_Target_default_compiler_dir_system/lib/libplibc.a || send_exit $0 $LINENO
+
+mkdir -p $productCrossPorting_Target_default_compiler_dir_system/include
+(cd include;tar -cf - *) | (cd $productCrossPorting_Target_default_compiler_dir_system/include;tar -xf -) || send_exit $0 $LINENO
 
