@@ -1,66 +1,33 @@
 #!/bin/sh
-
-# ########## # ########### ########### ########### ##########
-# ##
-# ##    Cocotron installer compmunity updates
-# ##    Based from Christopher J. W. Lloyd
-# ##        :: Cocotron project ::
-# ##
-# ##    Created by Genose.org (Sebastien Ray. Cotillard)
-# ##    Date 10-oct-2016
-# ##    last update 25-oct-2016
-# ##
-# ##    Please support genose.org, the author and his projects
-# ##    
-# ##    Based on genose.org tools
-# ##
-# ##    //////////////////////////////////////////////////////////////
-# ##    // http://project2306.genose.org  // git :: project2306_ide //
-# ##    /////////////////////////////////////////////////////////////
-# ##
-# ##    -- Cocotron compmunity updates
-# ##
-# ########## # ########### ########### ########### ##########
-# ########## # ########### ########### ########### ##########
-
-source $( find $(dirname $0) -name common_functions.sh -type f -print )
-
 ./install_FreeType.sh
 
-packedVersionMajor="2.4"
-packedVersionMinor=""
-packedVersionPlatform=""
-packedVersionArch=""
-packedVersionCheck="${packedVersionMajor}:${packedVersionMinor}:${packedVersionPlatform}:${packedVersionArch}"
-packedVersion="${packedVersionMajor}${packedVersionMinor}${packedVersionPlatform}${packedVersionArch}"
+installResources=`pwd`/Resources
+scriptResources=$installResources/scripts
+
+productFolder=/Developer/Cocotron/1.0
+downloadFolder=$productFolder/Downloads
 
 if [ ""$1"" = "" ];then
-	packedVersion=${packedVersion}
+	AGG_VERSION=2.4
 else
-	packedVersion=$1
+	AGG_VERSION=$1
 fi
 
-packedProduct="agg"
-productCrossPorting_Target_default_compiler_dir_system="${productCrossPorting_Target_default_compiler_dir_system}/${packedProduct}-${packedVersion}"
+PREFIX=`pwd`/../system/i386-mingw32msvc/agg-$AGG_VERSION
+BUILD=/tmp/build_AntiGrain
 
-echo " :::: ${productCrossPorting_Target_default_compiler_dir_system}"
-send_exit
-$scriptResources/downloadFilesIfNeeded.sh $productCrossPorting_downloadFolder -c "${packedVersionCheck}" "http://www.antigrain.com/agg-$packedVersion.zip"
+$scriptResources/downloadFilesIfNeeded.sh $downloadFolder "http://www.antigrain.com/agg-$AGG_VERSION.zip"
 
 mkdir -p $BUILD
 cd $BUILD
-$scriptResources/unarchiveFiles.sh  $productCrossPorting_downloadFolder $BUILD  "agg-$packedVersion"
-# ## unzip -o $productCrossPorting_downloadFolder/agg-$AGG_VERSION.zip
-cd agg-$packedVersion
+unzip -o $downloadFolder/agg-$AGG_VERSION.zip
+cd agg-$AGG_VERSION
 
 cd src
 
 # Create a fake Cocotron uname for the build system
 cat > uname <<EOF
 #!/bin/sh
-
-source $( find $(dirname $0) -name common_functions.sh -type f -print )
-
 echo "Cocotron"
 EOF
 chmod +x uname
@@ -70,9 +37,9 @@ cd ..
 cat > Makefile.in.Cocotron <<EOF
 AGGLIBS= -lagg 
 AGGCXXFLAGS = -O3
-CXX = ${productCrossPorting_Target_default_compiler_basedir}/bin/i386-pc-mingw32msvc-g++
-C = ${productCrossPorting_Target_default_compiler_basedir}/bin/i386-pc-mingw32msvc-gcc
-LIB = ${productCrossPorting_Target_default_compiler_basedir}/bin/i386-pc-mingw32msvc-ar cr
+CXX = /Developer/Cocotron/1.0/Windows/i386/gcc-4.3.1/bin/i386-pc-mingw32msvc-g++
+C = /Developer/Cocotron/1.0/Windows/i386/gcc-4.3.1/bin/i386-pc-mingw32msvc-gcc
+LIB = /Developer/Cocotron/1.0/Windows/i386/gcc-4.3.1/bin/i386-pc-mingw32msvc-ar cr
 
 .PHONY : clean
 EOF
@@ -88,6 +55,6 @@ touch gpc/gpc.c
 
 make
 
-mkdir -p $productCrossPorting_Target_default_compiler_dir_system
-(tar -cf - --exclude "Makefile*" include) | (cd $productCrossPorting_Target_default_compiler_dir_system;tar -xf -)
-cp src/libagg.a $productCrossPorting_Target_default_compiler_dir_system
+mkdir -p $PREFIX
+(tar -cf - --exclude "Makefile*" include) | (cd $PREFIX;tar -xf -)
+cp src/libagg.a $PREFIX

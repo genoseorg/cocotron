@@ -40,14 +40,14 @@ cd libjpeg-turbo-1.3.0
 
 pwd 
 
-GCC=$(echo $BASEDIR/gcc-$gccVersion/bin/*gcc |  tr -s " " ":" | cut -d':' -f 2 | awk "{print $1;  fflush();}")
-AS=$(echo $BASEDIR/gcc-$gccVersion/bin/*as |  tr -s " " ":" | cut -d':' -f 2 | awk "{print $1;  fflush();}")
-AR=$(echo $BASEDIR/gcc-$gccVersion/bin/*ar |  tr -s " " ":" | cut -d':' -f 2 | awk "{print $1;  fflush();}")
-RANLIB=$(echo $BASEDIR/gcc-$gccVersion/bin/*ranlib |  tr -s " " ":" | cut -d':' -f 2 | awk "{print $1;  fflush();}")
+GCC=$(echo $BASEDIR/gcc-$gccVersion/bin/*gcc)
+AS=$(echo $BASEDIR/gcc-$gccVersion/bin/*as)
+AR=$(echo $BASEDIR/gcc-$gccVersion/bin/*ar)
+RANLIB=$(echo $BASEDIR/gcc-$gccVersion/bin/*ranlib)
 TARGET=$($GCC -dumpmachine)
 export MAKE="$(which make)"
 
-make clean
-./configure --prefix="$PREFIX"  --disable-shared --host=$TARGET --target=$TARGET  AR=$AR AS=$AS CC=$GCC RANLIB=$RANLIB --with-jpeg8
+
+./configure --prefix="$PREFIX" -host $TARGET AR=$AR AS=$AS CC=$GCC RANLIB=$RANLIB --with-jpeg8 
 
 make && make install
